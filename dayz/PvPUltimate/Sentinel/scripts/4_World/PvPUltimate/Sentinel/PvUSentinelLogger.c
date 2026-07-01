@@ -1,6 +1,54 @@
 // PvUSentinelLogger.c
 // Sentinel telemetry module for PvPUltimate.
-// v0.1.0 goal: export JSON-style dashboard files without changing PvP enforcement behaviour.
+// v0.1.0 goal: export dashboard JSON files without changing PvP enforcement behaviour.
+
+class PvUSentinelStatus
+{
+    string server_name;
+    string mode;
+    int online_players;
+
+    void PvUSentinelStatus()
+    {
+        server_name = "DayZ PvP Sentinel";
+        mode = "UNKNOWN";
+        online_players = 0;
+    }
+}
+
+class PvUSentinelIncident
+{
+    string type;
+    string attacker;
+    string victim;
+    string reason;
+    bool legal;
+
+    void PvUSentinelIncident()
+    {
+        type = "incident";
+        attacker = "";
+        victim = "";
+        reason = "";
+        legal = false;
+    }
+}
+
+class PvUSentinelPunishment
+{
+    string type;
+    string player;
+    string action;
+    string reason;
+
+    void PvUSentinelPunishment()
+    {
+        type = "punishment";
+        player = "";
+        action = "";
+        reason = "";
+    }
+}
 
 class PvUSentinelLogger
 {
@@ -12,77 +60,64 @@ class PvUSentinelLogger
 
     static void Init()
     {
-        if (!FileExist(SENTINEL_DIR))
-        {
-            MakeDirectory(SENTINEL_DIR);
-        }
-
+        EnsureDirectory();
         WriteStatus("UNKNOWN", 0);
-        WriteTextFile(PLAYERS_FILE, "[]");
-        WriteTextFile(INCIDENTS_FILE, "[]");
-        WriteTextFile(PUNISHMENTS_FILE, "[]");
+        WriteEmptyArrayFile(PLAYERS_FILE);
+        WriteEmptyArrayFile(INCIDENTS_FILE);
+        WriteEmptyArrayFile(PUNISHMENTS_FILE);
     }
 
     static void WriteStatus(string mode, int onlinePlayers)
     {
-        string json = "{\n";
-        json += "    \"server_name\": \"DayZ PvP Sentinel\",\n";
-        json += "    \"mode\": \"" + EscapeJson(mode) + "\",\n";
-        json += "    \"online_players\": " + onlinePlayers.ToString() + "\n";
-        json += "}\n";
+        EnsureDirectory();
 
-        WriteTextFile(STATUS_FILE, json);
+        PvUSentinelStatus status = new PvUSentinelStatus();
+        status.mode = mode;
+        status.online_players = onlinePlayers;
+
+        JsonFileLoader<PvUSentinelStatus>.JsonSaveFile(STATUS_FILE, status);
     }
 
     static void LogIncident(string attackerId, string victimId, string reason, bool legal)
     {
-        string json = "{\n";
-        json += "    \"type\": \"incident\",\n";
-        json += "    \"attacker\": \"" + EscapeJson(attackerId) + "\",\n";
-        json += "    \"victim\": \"" + EscapeJson(victimId) + "\",\n";
-        json += "    \"reason\": \"" + EscapeJson(reason) + "\",\n";
-        json += "    \"legal\": " + BoolToJson(legal) + "\n";
-        json += "}\n";
+        EnsureDirectory();
 
-        WriteTextFile(INCIDENTS_FILE, json);
+        PvUSentinelIncident incident = new PvUSentinelIncident();
+        incident.attacker = attackerId;
+        incident.victim = victimId;
+        incident.reason = reason;
+        incident.legal = legal;
+
+        JsonFileLoader<PvUSentinelIncident>.JsonSaveFile(INCIDENTS_FILE, incident);
     }
 
     static void LogPunishment(string playerId, string action, string reason)
     {
-        string json = "{\n";
-        json += "    \"type\": \"punishment\",\n";
-        json += "    \"player\": \"" + EscapeJson(playerId) + "\",\n";
-        json += "    \"action\": \"" + EscapeJson(action) + "\",\n";
-        json += "    \"reason\": \"" + EscapeJson(reason) + "\"\n";
-        json += "}\n";
+        EnsureDirectory();
 
-        WriteTextFile(PUNISHMENTS_FILE, json);
+        PvUSentinelPunishment punishment = new PvUSentinelPunishment();
+        punishment.player = playerId;
+        punishment.action = action;
+        punishment.reason = reason;
+
+        JsonFileLoader<PvUSentinelPunishment>.JsonSaveFile(PUNISHMENTS_FILE, punishment);
     }
 
-    protected static void WriteTextFile(string path, string content)
+    protected static void EnsureDirectory()
+    {
+        if (!FileExist(SENTINEL_DIR))
+        {
+            MakeDirectory(SENTINEL_DIR);
+        }
+    }
+
+    protected static void WriteEmptyArrayFile(string path)
     {
         FileHandle file = OpenFile(path, FileMode.WRITE);
         if (file != 0)
         {
-            FPrint(file, content);
+            FPrint(file, "[]");
             CloseFile(file);
         }
-    }
-
-    protected static string EscapeJson(string value)
-    {
-        value.Replace("\\", "\\\\");
-        value.Replace("\"", "\\\"");
-        return value;
-    }
-
-    protected static string BoolToJson(bool value)
-    {
-        if (value)
-        {
-            return "true";
-        }
-
-        return "false";
     }
 }
