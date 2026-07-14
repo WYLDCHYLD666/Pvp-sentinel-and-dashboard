@@ -1,35 +1,82 @@
-# PvP Sentinel and Dashboard
+# Sentinel - DayZ Server Management Platform
 
-Sentinel is a DayZ PvP enforcement dashboard built around the stable PvPUltimate mod.
+## Overview
 
-PvPUltimate remains the authority for PvP rules, zones, punishments, and weekend PvP. Sentinel adds logging, JSON export, dashboard data, API endpoints, and future admin tooling.
+Sentinel is a server-side management platform for DayZ that provides
+live telemetry from your server to a web-based dashboard.
 
-## Project layout
+### Current Features
 
-```text
-Pvp-sentinel-and-dashboard/
-├── dayz/        # DayZ mod integration and PvPUltimate Sentinel module
-├── api/         # PHP/MySQL REST API for hosting provider
-├── dashboard/   # Web dashboard frontend
-├── agent/       # Optional sync/FTP/hosting agent tooling
-├── docs/        # Architecture, setup, and roadmap
-├── tools/       # Helper scripts
-└── releases/    # Packaged builds and release notes
-```
+-   Live server status
+-   Live player count
+-   Live player list
+-   JSON telemetry generation
+-   Automatic dashboard synchronization
+-   PvP zone framework
+-   Event logging framework
 
-## First milestone: v0.1.0
+## Project Status
 
-- Add Sentinel as a module inside PvPUltimate.
-- Export server status JSON to the GPORTAL config/profile area.
-- Export players, incidents, and punishments as dashboard-readable JSON.
-- Keep PvPUltimate stable and avoid changing enforcement behaviour until logging is proven.
+### Completed
 
-## Expected DayZ output
+-   Stable Sentinel server mod
+-   Live JSON telemetry
+-   Dashboard integration
+-   GPortal FTP/cron synchronization
+-   Live player detection
+-   Live player list export
 
-```text
-config/PvPSentinel/
-├── status.json
-├── players.json
-├── incidents.json
-└── punishments.json
-```
+### In Development
+
+-   Player position tracking
+-   Health & blood telemetry
+-   Kill feed
+-   PvP event logging
+-   AI event logging
+-   Live map integration
+
+### Planned
+
+-   User accounts
+-   Multi-server management
+-   Server registration
+-   Licensing
+-   REST API
+-   Discord integration
+
+## JSON Output
+
+    config/
+    └── Sentinel/
+        ├── build_info.json
+        ├── events.json
+        ├── players.json
+        ├── status.json
+        └── zones.json
+
+## Dashboard
+
+http://sentineladmin.co.uk/dashboard/
+
+## Repository Structure
+
+    Pvp-sentinel-and-dashboard/
+    ├── README.md
+    ├── CHANGELOG.md
+    ├── ROADMAP.md
+    ├── LICENSE
+    ├── sentinel-mod/
+    ├── dashboard/
+    ├── website/
+    ├── docs/
+    ├── releases/
+    └── tools/
+
+## Current Milestone
+
+**Version:** v0.6.2.6
+
+**Status:** Stable live telemetry pipeline
+
+Pipeline: DayZ Server -\> Sentinel Mod -\> JSON -\> GPortal Sync -\>
+Dashboard
