@@ -1,0 +1,10 @@
+name = "Sentinel";
+picture = "";
+logo = "";
+logoSmall = "";
+logoOver = "";
+tooltip = "Sentinel";
+overview = "Sentinel v0.6.2.7 server-only live player position export.";
+action = "https://sentineladmin.co.uk";
+author = "Sentinel Project";
+version = "0.6.2.7";
