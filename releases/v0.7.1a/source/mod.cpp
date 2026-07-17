@@ -1,0 +1,10 @@
+name = "Sentinel";
+picture = "";
+logoSmall = "";
+logo = "";
+logoOver = "";
+tooltip = "Sentinel";
+overview = "Server-only DayZ telemetry and PvP management core.";
+action = "https://sentineladmin.co.uk";
+author = "Sentinel Project";
+version = "0.7.1";
