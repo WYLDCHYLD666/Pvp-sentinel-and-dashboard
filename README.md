@@ -2,57 +2,93 @@
 
 ## Overview
 
-Sentinel is a server-side management platform for DayZ that provides
-live telemetry from your server to a web-based dashboard.
+Sentinel is a server-side management and telemetry platform for DayZ. It exports live server and player data to JSON for use by a web dashboard and future integrations.
 
-### Current Features
+## Current Stable Version
 
--   Live server status
--   Live player count
--   Live player list
--   JSON telemetry generation
--   Automatic dashboard synchronization
--   PvP zone framework
--   Event logging framework
+**Version:** v0.8.1  
+**Status:** Stable player telemetry, lifecycle events, and death detection
 
-## Project Status
+## Current Features
 
-### Completed
+- Live server status and heartbeat
+- Live player count and player list
+- Player position and heading
+- Player health, blood, shock, and online time
+- Server-only operation
+- JSON telemetry generation
+- Player connected events
+- Player disconnected events
+- Player reconnect detection
+- Player death events
+- Ordered event sequence numbers
+- UTC ISO-8601 timestamps
+- Per-server-session IDs
+- Event schema versioning
+- Event retention metadata
+- PvP zone framework
 
--   Stable Sentinel server mod
--   Live JSON telemetry
--   Dashboard integration
--   GPortal FTP/cron synchronization
--   Live player detection
--   Live player list export
+## Validated Event Flow
 
-### In Development
+```text
+player_connected
+player_died
+player_disconnected
+player_connected
+player_died
+player_disconnected
+```
 
--   Player position tracking
--   Health & blood telemetry
--   Kill feed
--   PvP event logging
--   AI event logging
--   Live map integration
+The v0.8.1 lifecycle and death-event pipeline has been tested across multiple deaths, disconnects, and reconnects without duplicate events.
 
-### Planned
+## In Development
 
--   User accounts
--   Multi-server management
--   Server registration
--   Licensing
--   REST API
--   Discord integration
+- Killer attribution
+- Victim and killer identity
+- Cause-of-death classification
+- Weapon used
+- Kill distance
+- Headshot detection
+- PvP event feed
+- Live map integration
+
+## Planned
+
+- Vehicle ownership and last-known-location tracking
+- Vehicle driver history
+- Discord notifications
+- Player history and session analytics
+- Heatmaps
+- REST API
+- User accounts
+- Multi-server management
+- Server registration and licensing
 
 ## JSON Output
 
-    config/
-    └── Sentinel/
-        ├── build_info.json
-        ├── events.json
-        ├── players.json
-        ├── status.json
-        └── zones.json
+```text
+$profile/Sentinel/
+├── build_info.json
+├── events.json
+├── players.json
+└── status.json
+```
+
+## Event Example
+
+```json
+{
+  "sequence": 2,
+  "timestamp": "2026-07-19T09:39:09Z",
+  "type": "player_died",
+  "player": {
+    "name": "ExamplePlayer",
+    "id": "example-player-id"
+  }
+}
+```
+
+Timestamps are stored in UTC. The dashboard can convert them to each viewer's local timezone without changing the authoritative event time.
 
 ## Dashboard
 
@@ -60,23 +96,22 @@ http://sentineladmin.co.uk/dashboard/
 
 ## Repository Structure
 
-    Pvp-sentinel-and-dashboard/
-    ├── README.md
-    ├── CHANGELOG.md
-    ├── ROADMAP.md
-    ├── LICENSE
-    ├── sentinel-mod/
-    ├── dashboard/
-    ├── website/
-    ├── docs/
-    ├── releases/
-    └── tools/
+```text
+Pvp-sentinel-and-dashboard/
+├── README.md
+├── CHANGELOG.md
+├── ROADMAP.md
+├── LICENSE
+├── sentinel-mod/
+├── dashboard/
+├── website/
+├── docs/
+├── releases/
+└── tools/
+```
 
-## Current Milestone
+## Next Milestone
 
-**Version:** v0.6.2.6
+**v0.8.2-beta1 - Killer Attribution**
 
-**Status:** Stable live telemetry pipeline
-
-Pipeline: DayZ Server -\> Sentinel Mod -\> JSON -\> GPortal Sync -\>
-Dashboard
+The next build will identify who or what caused a player death while preserving the stable v0.8.1 event pipeline.
