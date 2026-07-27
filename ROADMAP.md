@@ -101,6 +101,81 @@ Status: Planned
 - Plugin and webhook architecture.
 - Administration and punishment workflows.
 
+## Dev13 — Server Integration and In-Game Experience
+
+Status: Planned — required before public release
+
+Connect the completed dashboard features back into the DayZ server mod so Sentinel becomes one coordinated system rather than separate web and game components.
+
+### Dashboard-to-server control channel
+
+- Add an authenticated server-side agent that downloads approved Sentinel configuration changes over HTTPS.
+- Synchronise PvP zones, schedules, purge-night settings and notification preferences from the dashboard to the DayZ server.
+- Use revision numbers, checksums and acknowledgements so the dashboard can confirm which configuration is active on the server.
+- Keep the last known-good local configuration if the web service is unavailable or returns invalid data.
+- Write audit events whenever a configuration is published, received, rejected or activated.
+- Require explicit publish and activation actions so editing a draft cannot immediately change the live server.
+
+### In-game zone map integration
+
+- Display Sentinel PvP zones on the player's in-game map.
+- Support circle and polygon zones using the same coordinates as the dashboard Zone Manager.
+- Use distinct map colours and labels for safe zones, PvP zones, event zones and purge-wide PvP status.
+- Update map markers when the server activates a new zone revision.
+- Hide restricted administrative metadata from normal players.
+- Ensure servers can disable in-game zone drawing when desired.
+
+### Zone entry and exit notifications
+
+- Detect each player's transition into and out of every enabled zone.
+- Show clear in-game notifications containing the zone name and current rules.
+- Prevent notification spam by only alerting on a genuine boundary transition and applying a short debounce near zone edges.
+- Support configurable messages, colours and display duration.
+- Optionally play a short approved notification sound for entry and exit.
+- Record zone-entered and zone-exited events for the dashboard timeline and replay system.
+
+Example player messages:
+
+```text
+ENTERING PVP ZONE — Kamenka
+Weapons free. PvP rules are active.
+
+LEAVING PVP ZONE — Kamenka
+Safe-area rules are active.
+```
+
+### Purge-night scheduler and in-game announcement
+
+- Link purge nights to the Rule Scheduler and the authoritative server clock.
+- Support scheduled start and end times, recurring rules, manual activation and emergency cancellation.
+- Announce upcoming purge nights at configurable intervals such as 30, 10, 5 and 1 minute before activation.
+- At activation, switch the server to global PvP and publish the new state to the dashboard immediately.
+- Display a full-screen or prominent in-game purge announcement.
+- Play a configurable server-provided purge siren or announcement sound to connected players.
+- Use an original, licensed or server-owned audio asset rather than distributing copyrighted film or television audio without permission.
+- Allow volume, duration and replay behaviour to be configured; do not loop indefinitely.
+- Notify players who connect while purge mode is already active.
+- At the scheduled end, restore the normal zone rules, play an optional all-clear sound and notify players.
+- Record purge scheduled, warning, started, cancelled and ended events in Sentinel telemetry.
+
+### Reliability and safety requirements
+
+- The DayZ server remains authoritative for active rules and enforcement.
+- Dashboard failure must never disable PvP enforcement or corrupt the live zone configuration.
+- Configuration parsing must fail closed and retain the previous valid configuration.
+- Every server-side integration change must pass server-start and player-login tests.
+- Purge activation and cancellation must be idempotent so duplicate sync messages cannot trigger duplicate state changes or repeated sounds.
+- Provide an administrator kill switch to disable remote configuration while retaining local enforcement.
+
+Definition of done:
+
+- A zone created and published in the dashboard appears accurately on the DayZ server and in the in-game map.
+- Players receive one correct entry notification and one correct exit notification per transition.
+- Dashboard, server enforcement, in-game map and telemetry all report the same active zone revision.
+- A scheduled purge produces advance warnings, the configured start sound and announcement, global PvP activation, dashboard state updates and a clean scheduled end.
+- Restarting the server during an active purge restores the correct state from the schedule and persisted configuration.
+- Loss of web connectivity does not interrupt existing server rules.
+
 ## Public release
 
 Status: Future
