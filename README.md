@@ -92,7 +92,7 @@ Timestamps are stored in UTC. The dashboard can convert them to each viewer's lo
 
 ## Dashboard
 
-http://sentineladmin.co.uk/dashboard/
+http://www.sentineladmin.co.uk/dashboard/
 
 ## Repository Structure
 
