@@ -1,26 +1,46 @@
 # PvP Sentinel and Dashboard
 
-Sentinel is a DayZ server-side PvP enforcement, telemetry, and administration platform.
+Sentinel is a DayZ server-side PvP enforcement, telemetry, investigation and administration platform.
 
-The current stable baseline is **v0.6.1**. Sentinel runs as a **server-only mod** on the DayZ server and must not be loaded by players through the client mod list.
+## Current development status
 
-## Current status
+The active dashboard milestone is **v2.0.0-dev9.7 — Operation Overwatch**.
 
-- Server starts successfully with Sentinel enabled.
-- Players can log in when Sentinel is loaded through the server mod list only.
-- The Sentinel profile/config folder is created.
-- JSON files are created, but live data export still needs to be connected.
-- The dedicated test server is **The Sentinel Development Environment**.
+Completed dashboard architecture:
+
+- Dev5 — modular Map Engine
+- Dev6 — Zone Manager
+- Dev7 — Professional Editor
+- Dev8 — GIS Tools
+- Dev9 — Live Tactical View
+- Dev9.1–Dev9.6 — follow, trail and fast-polling stabilisation
+- Dev9.7 — Combat Event Timeline
+
+The current tactical dashboard supports live players, smooth interpolation, followed-player trails, player fitting, gunshot/death/vehicle markers, zone overlays and a dedicated 2-second tactical telemetry cycle.
+
+## Combat Event Timeline
+
+Dev9.7 adds a live investigation timeline for:
+
+- gunshots
+- player hits and damage
+- PvP kills
+- deaths
+- unconscious events
+- vehicle activity
+- zone entry and exit activity
+
+Events containing coordinates can be selected to open and centre the tactical map on the incident location.
 
 ## Project layout
 
 ```text
 Pvp-sentinel-and-dashboard/
 ├── dayz/        # DayZ server mod source
-├── api/         # PHP/MySQL REST API
+├── api/         # PHP REST and telemetry endpoints
 ├── dashboard/   # Web dashboard frontend
 ├── agent/       # Optional server-to-web sync agent
-├── docs/        # Architecture, setup, roadmap, and developer journal
+├── docs/        # Architecture, setup and roadmap
 ├── tools/       # Helper and release scripts
 └── releases/    # Packaged builds and release notes
 ```
@@ -30,45 +50,28 @@ Pvp-sentinel-and-dashboard/
 ```text
 DayZ Server
     │
-    ├── @Sentinel loaded as server-only
-    │
+    ├── @Sentinel loaded server-side
     ├── writes JSON telemetry
-    │
-    └── Sentinel Agent sends data over HTTPS
+    └── sync process publishes telemetry over HTTPS
             │
             ▼
-       Web API + MySQL
+       PHP telemetry API
             │
-            ▼
-        Dashboard
+            ├── full snapshot refresh: 15 seconds
+            └── tactical refresh: 2 seconds
+                    │
+                    ▼
+             Sentinel Dashboard
 ```
 
-## Stable baseline
+## Branch policy
 
-**Version:** `v0.6.1-login-baseline`
+- `main` remains the deployable stable baseline.
+- `develop` contains active integrated development.
+- Feature work is built on dedicated branches and squash-merged after testing.
 
-Rules for the stable branch:
+## Roadmap
 
-1. `main` must always remain deployable.
-2. Every feature is developed from `develop` on a dedicated feature branch.
-3. Every change is tested on The Sentinel Development Environment.
-4. Login must be tested before a change can be merged.
-5. Every change requires a changelog entry and Git commit.
+Operation Atlas established the reusable dashboard architecture. Operation Overwatch is adding tactical investigation, followed by replay, analytics and plugin support.
 
-## Next milestone
-
-**v0.6.2 — Live JSON Export Engine**
-
-Expected output:
-
-```text
-$profile:Sentinel/
-├── status.json
-├── players.json
-├── incidents.json
-├── punishments.json
-├── zones.json
-└── config.json
-```
-
-See `ROADMAP.md`, `CHANGELOG.md`, and `docs/DEVELOPMENT_JOURNAL.md` for the full project record.
+See `CHANGELOG.md` and `docs/OPERATION-OVERWATCH.md` for the current project record.
