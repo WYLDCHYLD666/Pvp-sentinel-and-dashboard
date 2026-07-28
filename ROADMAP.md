@@ -176,6 +176,61 @@ Definition of done:
 - Restarting the server during an active purge restores the correct state from the schedule and persisted configuration.
 - Loss of web connectivity does not interrupt existing server rules.
 
+## Dev14 — Universal Server Onboarding and Auto-Pairing
+
+Status: Planned — required for dashboard rental
+
+Allow a customer to rent a Sentinel dashboard, enter basic server information and connect any supported DayZ server without needing a host-specific integration.
+
+### Customer onboarding wizard
+
+- Ask for server name, public IP or hostname, game port, query port, world name, timezone and hosting provider.
+- Generate a unique one-time pairing code and downloadable Sentinel server configuration.
+- Provide host-neutral installation instructions plus optional guides for common control panels.
+- Show clear progress states: waiting for mod, pairing detected, authentication complete, telemetry live and configuration synchronised.
+- Automatically select the correct Sentinel map profile after the server reports its world name.
+
+### Universal pairing protocol
+
+- The Sentinel mod or companion agent initiates an outbound HTTPS connection to the dashboard service.
+- The server submits the one-time pairing code, installation identity, mod version and server fingerprint.
+- The dashboard exchanges the pairing code for a revocable server credential; the one-time code then expires.
+- No inbound ports, router changes or direct dashboard access to the rented game server are required.
+- Use signed requests, timestamps, nonces and key rotation to prevent replay and impersonation.
+- Store secrets outside public web directories and never display full credentials after creation.
+
+### Host-independent transport modes
+
+Use the best available method for each hosting environment:
+
+1. Native outbound HTTPS from the Sentinel server component where the DayZ scripting/runtime permits it.
+2. Lightweight Sentinel Agent for VPS, dedicated and hosts that allow custom executables or scripts.
+3. Scheduled SFTP/FTP/HTTPS relay for restricted game-hosting panels that expose files but do not permit an agent.
+4. Manual diagnostics package as a last-resort setup and support path.
+
+- Automatically detect the active transport mode during setup.
+- Keep one dashboard API and telemetry schema across all transport modes.
+- Add provider adapters only when a host has unusual restrictions; the customer-facing workflow remains the same.
+- Clearly report when a host blocks a required capability instead of pretending the server is connected.
+
+### Connection health and support
+
+- Display last heartbeat, telemetry age, active mod version, server build, transport mode and configuration revision.
+- Run an automatic connection test during pairing and explain exactly which step failed.
+- Detect duplicate pairing, copied server identities, expired credentials and clock drift.
+- Allow an owner to disconnect, rotate credentials or transfer a server between dashboard subscriptions.
+- Support multiple servers under one customer account according to the rental plan.
+- Retain the server's last known-good configuration during temporary connection loss.
+
+Definition of done:
+
+- A new customer can create a dashboard tenant and reach live telemetry by installing Sentinel and entering one pairing code.
+- The workflow does not require Sentinel staff to edit the customer's files or database manually.
+- The connection works across VPS, dedicated servers and common managed DayZ hosts using an available supported transport.
+- No game server needs to accept an inbound connection from the dashboard.
+- The dashboard confirms the mod version, world, server identity and active configuration before marking setup complete.
+- Unpairing or rotating credentials immediately prevents the old credential from publishing telemetry or receiving configuration.
+
 ## Public release
 
 Status: Future
