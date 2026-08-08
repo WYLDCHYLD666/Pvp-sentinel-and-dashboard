@@ -1,0 +1,41 @@
+--- a/Sentinel/dashboard/assets/js/zone-manager.js
++++ b/Sentinel/dashboard/assets/js/zone-manager.js
+@@ -1,5 +1,5 @@
+ 'use strict';
+-// Sentinel Dev12.1e — Zone Map Controls & Adaptive Grid.
++// Sentinel Dev13.7c — Fixed-Size Zone Handles & Polygon UI Cleanup.
+ // Adds direct selection/manipulation, multi-select, box selection and undo/redo.
+ (() => {
+ const ZONES_API='api/zones.php';
+@@ -27,7 +27,9 @@
+ function renderZoneLibrary(){const n=$('zone-list');if(!n||!zoneState)return;const query=String($('zone-search')?.value||'').trim().toLowerCase(),filter=$('zone-type-filter')?.value||'all';const list=allZones().filter(z=>(filter==='all'||z.type===filter)&&(!query||String(z.name||'').toLowerCase().includes(query)));set('zone-count',allZones().length);n.innerHTML=list.length?`<table class="zone-table"><thead><tr><th>Name</th><th>Type</th><th>Shape</th><th>Priority</th><th>Status</th><th>Geometry</th><th>Enabled</th><th>Actions</th></tr></thead><tbody>${list.map(z=>`<tr class="${selectedIds.has(z.id)?'selected':''}" data-zone-card="${esc(z.id)}" style="--zone-colour:${zoneColour(z.type)}"><td><span class="zone-type-dot"></span><strong>${esc(z.name||'Unnamed zone')}</strong></td><td>${esc(zoneTypeLabel(z.type))}</td><td>${esc(z.shape||'circle')}</td><td>${Number(z.priority||100)}</td><td><span class="zone-sync-badge ${esc(z.sync_status||'applied')}">${esc(zoneSyncLabel(z))}</span></td><td>${z.shape==='circle'?`${Number(z.radius||0).toLocaleString()}m`:`${(z.points||[]).length} points`}</td><td>${z.enabled===false?'No':'Yes'}</td><td><button type="button" class="secondary-btn" data-zone-edit="${esc(z.id)}">Edit</button> <button type="button" class="secondary-btn danger-btn" data-zone-delete="${esc(z.id)}">Delete</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No matching zones.</p>';renderLiveZoneOverlays(zoneWorldSize);renderZoneSyncSummary();updateSelectionStatus()}
+ function svgPoint(p){return `${p[0]/zoneWorldSize*1000},${1000-p[1]/zoneWorldSize*1000}`}
+ function zoneSvg(z){const c=zoneColour(z.type),sel=selectedIds.has(z.id),active=activeId===z.id,cls=`zone-shape ${sel?'is-selected':''} ${active?'is-active':''}`;if(z.shape==='polygon'&&(z.points||[]).length>=3)return `<polygon class="${cls}" data-zone-id="${esc(z.id)}" points="${z.points.map(svgPoint).join(' ')}" fill="${c}" fill-opacity="${z.enabled===false?.12:.24}" stroke="${c}"/>`;if(z.centre){const cx=z.centre[0]/zoneWorldSize*1000,cy=1000-z.centre[1]/zoneWorldSize*1000,r=Number(z.radius||0)/zoneWorldSize*1000;return `<circle class="${cls}" data-zone-id="${esc(z.id)}" cx="${cx}" cy="${cy}" r="${r}" fill="${c}" fill-opacity="${z.enabled===false?.12:.24}" stroke="${c}"/>`}return ''}
+-function editorHandles(z){if(!z||activeId!==z.id)return '';if(z.shape==='circle'&&z.centre){const cx=z.centre[0]/zoneWorldSize*1000,cy=1000-z.centre[1]/zoneWorldSize*1000,r=Number(z.radius||0)/zoneWorldSize*1000;return `<line class="zone-radius-line" x1="${cx}" y1="${cy}" x2="${cx+r}" y2="${cy}"/><circle class="zone-handle zone-radius-handle" data-handle="radius" cx="${cx+r}" cy="${cy}" r="9"/>`}if(z.shape==='polygon'){let out='';(z.points||[]).forEach((p,i)=>{out+=`<circle class="zone-handle zone-vertex" data-handle="vertex" data-index="${i}" cx="${p[0]/zoneWorldSize*1000}" cy="${1000-p[1]/zoneWorldSize*1000}" r="8"><title>Drag point · double-click to delete</title></circle>`;const q=z.points[(i+1)%z.points.length];if(q){const m=[(p[0]+q[0])/2,(p[1]+q[1])/2];out+=`<circle class="zone-handle zone-midpoint" data-handle="insert" data-index="${i+1}" cx="${m[0]/zoneWorldSize*1000}" cy="${1000-m[1]/zoneWorldSize*1000}" r="6"><title>Click to insert point</title></circle>`}});return out}return ''}
++function zoneHandleUnits(px){const r=zoneEditorImageRect();return r&&r.width?Math.max(.35,Number(px)*1000/r.width):Number(px)}
++function zoneHandle(cx,cy,kind,index,visiblePx,hitPx,cls,title){const vr=zoneHandleUnits(visiblePx),hr=zoneHandleUnits(hitPx),idx=index===null?'':` data-index="${index}"`;return `<circle class="zone-handle-hit" data-handle="${kind}"${idx} cx="${cx}" cy="${cy}" r="${hr}"><title>${title}</title></circle><circle class="zone-handle ${cls}" cx="${cx}" cy="${cy}" r="${vr}" pointer-events="none"/>`}
++function editorHandles(z){if(!z||activeId!==z.id)return '';if(z.shape==='circle'&&z.centre){const cx=z.centre[0]/zoneWorldSize*1000,cy=1000-z.centre[1]/zoneWorldSize*1000,r=Number(z.radius||0)/zoneWorldSize*1000;return `<line class="zone-radius-line" x1="${cx}" y1="${cy}" x2="${cx+r}" y2="${cy}"/>${zoneHandle(cx+r,cy,'radius',null,7,14,'zone-radius-handle','Drag to change radius')}`}if(z.shape==='polygon'){let out='';(z.points||[]).forEach((p,i)=>{const cx=p[0]/zoneWorldSize*1000,cy=1000-p[1]/zoneWorldSize*1000;out+=zoneHandle(cx,cy,'vertex',i,7,14,'zone-vertex','Drag point · double-click to delete');const q=z.points[(i+1)%z.points.length];if(q){const m=[(p[0]+q[0])/2,(p[1]+q[1])/2];out+=zoneHandle(m[0]/zoneWorldSize*1000,1000-m[1]/zoneWorldSize*1000,'insert',i+1,5,12,'zone-midpoint','Click to insert point')}});return out}return ''}
+ function renderZoneEditor(){const svg=$('zone-editor-svg');if(!svg)return;positionZoneEditorOverlay();const zones=[...allZones().filter(z=>!zoneDraft||z.id!==zoneDraft.id),...(zoneDraft?[zoneDraft]:[])];const gis=window.SentinelGIS?.renderSvg?.(zoneWorldSize,zoneEditorView.scale)||'';svg.innerHTML=`${gis}<g id="zone-shapes">${zones.map(zoneSvg).join('')}</g><g id="zone-handles">${editorHandles(zoneDraft||findZone(activeId))}</g><rect id="zone-selection-box" class="zone-selection-box" hidden/>`;window.SentinelGIS?.applyLayers?.();const hint=$('zone-editor-hint');if(hint)hint.textContent=zoneDrawMode==='circle'?'Click the map to place the circle centre.':zoneDrawMode==='polygon'?'Click to add polygon points. Double-click to finish.':selectedIds.size?'Drag a selected zone or its handles. Shift-click to multi-select. Ctrl-drag empty map for box selection.':'Click a zone to select it. Ctrl-drag empty map for box selection.'}
+--- a/Sentinel/dashboard/style.css
++++ b/Sentinel/dashboard/style.css
+@@ -128,3 +128,6 @@
+ .map-stage .map-layer:has(.native-tile-layer){will-change:left,top,width,height;transition:left .12s ease-out,top .12s ease-out,width .12s ease-out,height .12s ease-out}
+ .map-stage.dragging .map-layer:has(.native-tile-layer){transition:none}
+ .native-tile-layer img,.zone-native-tile-layer img{image-rendering:auto}
++
++/* Dev13.7c */
++.zone-handle-hit{fill:transparent;stroke:none;pointer-events:all;cursor:grab}.zone-handle-hit:active{cursor:grabbing}.zone-handle{pointer-events:none}
+--- a/Sentinel/dashboard/index.html
++++ b/Sentinel/dashboard/index.html
+@@ -10,7 +10,7 @@
+-  <link rel="stylesheet" href="style.css?v=13.7.2">
++  <link rel="stylesheet" href="style.css?v=13.7.3">
+@@ -385,7 +385,7 @@
+-    <footer><span>Sentinel Dashboard Dev13.7b · Unified Map Rendering & Zoom Persistence</span><span id="last-updated">Not updated</span></footer>
++    <footer><span>Sentinel Dashboard Dev13.7c · Fixed-Size Zone Handles & Polygon UI Cleanup</span><span id="last-updated">Not updated</span></footer>
+@@ -399,9 +399,9 @@
+-<script src="assets/js/zone-manager.js?v=13.7.2"></script>
++<script src="assets/js/zone-manager.js?v=13.7.3"></script>
+ <script src="assets/js/settings.js?v=13.7.2"></script>
+-<script src="app.js?v=13.7.2"></script>
++<script src="app.js?v=13.7.3"></script>
