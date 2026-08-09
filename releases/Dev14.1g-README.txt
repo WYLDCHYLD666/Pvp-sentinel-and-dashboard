@@ -1,0 +1,9 @@
+SENTINEL DEV14.1g / v0.9.3-alpha7
+COMPILE FIX 7
+
+- Fixes SentinelPvPZoneManager.c line 563 parser failure.
+- JsonSaveFile(defaultContract) is now a single-line call.
+- Retains all previous Dev14.1 fixes.
+
+Build/sign BUILD_THIS_AS_PBO/Sentinel.
+UPLOAD_AFTER_BUILD remains the previous stable rollback PBO.

@@ -1,0 +1,10 @@
+name = "Sentinel";
+picture = "";
+logoSmall = "";
+logo = "";
+logoOver = "";
+tooltip = "Sentinel";
+overview = "Sentinel v0.9.2-alpha2 enhanced PvP telemetry with weapon, distance and position data.";
+action = "https://sentineladmin.co.uk";
+author = "Sentinel Project";
+version = "0.9.3-alpha7";
