@@ -2,6 +2,18 @@
 
 All notable changes to Sentinel are documented in this file.
 
+## SentinelUI v0.3.0-alpha9 - 2026-09-06
+
+### Fixed
+
+- Replaced unsupported C-style ternary expressions with explicit Enforce Script conditionals
+- Restored server World module compilation after the extended zone-card update
+
+### Verified
+
+- The reported startup failure was isolated to `SentinelUIZoneState.c:32` and `SentinelUIServerZoneBridge.c:51`
+- Workshop PBO signature validation passes
+
 ## SentinelUI v0.3.0-alpha8 - 2026-09-06
 
 ### Added

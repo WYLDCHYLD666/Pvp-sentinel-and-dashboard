@@ -1,4 +1,6 @@
-# SentinelUI v0.3.0 Purge scheduler alpha 8 - complete zone cards
+# SentinelUI v0.3.0 Purge scheduler alpha 9 - Enforce Script compile fix
+
+All C-style ternary expressions introduced with the extended zone cards have been replaced with explicit Enforce Script conditionals so the server can compile the mod during startup.
 
 Trader, Admin, Event, Radiation, and Raid transitions retain their zone type instead of falling back to Safe. Their HUD cards use the supplied transparent `_ca.paa` assets and the matching dashboard palette.
 

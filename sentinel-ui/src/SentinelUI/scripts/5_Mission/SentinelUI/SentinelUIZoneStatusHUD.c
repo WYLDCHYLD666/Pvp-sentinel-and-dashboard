@@ -132,7 +132,12 @@ class SentinelUIZoneStatusHUD
 
             if (m_Zone)
             {
-                m_Zone.SetText(zoneName == "" ? "TRADER ZONE" : zoneName);
+                m_Zone.SetText("TRADER ZONE");
+
+                if (zoneName != "")
+                {
+                    m_Zone.SetText(zoneName);
+                }
             }
         }
         else if (zoneType == "admin")
@@ -155,7 +160,12 @@ class SentinelUIZoneStatusHUD
 
             if (m_Zone)
             {
-                m_Zone.SetText(zoneName == "" ? "ADMIN ZONE" : zoneName);
+                m_Zone.SetText("ADMIN ZONE");
+
+                if (zoneName != "")
+                {
+                    m_Zone.SetText(zoneName);
+                }
             }
         }
         else if (zoneType == "event")
@@ -178,7 +188,12 @@ class SentinelUIZoneStatusHUD
 
             if (m_Zone)
             {
-                m_Zone.SetText(zoneName == "" ? "EVENT ZONE" : zoneName);
+                m_Zone.SetText("EVENT ZONE");
+
+                if (zoneName != "")
+                {
+                    m_Zone.SetText(zoneName);
+                }
             }
         }
         else if (zoneType == "radiation")
@@ -201,7 +216,12 @@ class SentinelUIZoneStatusHUD
 
             if (m_Zone)
             {
-                m_Zone.SetText(zoneName == "" ? "RADIATION ZONE" : zoneName);
+                m_Zone.SetText("RADIATION ZONE");
+
+                if (zoneName != "")
+                {
+                    m_Zone.SetText(zoneName);
+                }
             }
         }
         else if (zoneType == "raid")
@@ -224,7 +244,12 @@ class SentinelUIZoneStatusHUD
 
             if (m_Zone)
             {
-                m_Zone.SetText(zoneName == "" ? "RAID ZONE" : zoneName);
+                m_Zone.SetText("RAID ZONE");
+
+                if (zoneName != "")
+                {
+                    m_Zone.SetText(zoneName);
+                }
             }
         }
         else

@@ -22,10 +22,10 @@ Sentinel is designed as a server-administration platform rather than an in-game 
 
 ### SentinelUI client mod
 
-**Version:** v0.3.0-alpha8
+**Version:** v0.3.0-alpha9
 **Status:** PvP, Safe, Trader, Admin, Event, Radiation, Raid, Purge and Expansion-map zone presentation
 
-SentinelUI is maintained separately from the server-side Sentinel core. Its source is under `sentinel-ui/`, and the signed Workshop-ready package is under `releases/SentinelUI-v0.3.0-alpha8/`.
+SentinelUI is maintained separately from the server-side Sentinel core. Its source is under `sentinel-ui/`, and the signed Workshop-ready package is under `releases/SentinelUI-v0.3.0-alpha9/`.
 
 ## Current DayZ Telemetry Features
 

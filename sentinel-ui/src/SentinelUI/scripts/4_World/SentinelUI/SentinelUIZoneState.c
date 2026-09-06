@@ -29,7 +29,14 @@ class SentinelUIZoneState
 
         if (zoneType == "")
         {
-            zoneType = kind == SentinelUIZoneProtocol.KIND_ENTER_PVP ? "pvp" : "safe";
+            if (kind == SentinelUIZoneProtocol.KIND_ENTER_PVP)
+            {
+                zoneType = "pvp";
+            }
+            else
+            {
+                zoneType = "safe";
+            }
         }
 
         if (kind == SentinelUIZoneProtocol.KIND_ENTER_PVP)

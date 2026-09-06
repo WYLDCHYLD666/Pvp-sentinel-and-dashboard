@@ -16,7 +16,7 @@ class CfgMods
         dir = "SentinelUI";
         name = "Sentinel UI";
         author = "Sentinel Project";
-        version = "0.3.0-purge-scheduler-alpha8-complete-zone-cards";
+        version = "0.3.0-purge-scheduler-alpha9-enforce-compile-fix";
         type = "mod";
         dependencies[] = {"World", "Mission"};
 

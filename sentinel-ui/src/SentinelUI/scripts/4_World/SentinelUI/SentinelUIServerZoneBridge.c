@@ -48,7 +48,13 @@ modded class SentinelPvPZoneManager
 
         if (currentZone)
         {
-            int kind = currentZone.type == "pvp" ? SentinelUIZoneProtocol.KIND_ENTER_PVP : SentinelUIZoneProtocol.KIND_LEAVE_PVP;
+            int kind = SentinelUIZoneProtocol.KIND_LEAVE_PVP;
+
+            if (currentZone.type == "pvp")
+            {
+                kind = SentinelUIZoneProtocol.KIND_ENTER_PVP;
+            }
+
             SentinelUISendZoneState(player, kind, currentZone);
             return;
         }

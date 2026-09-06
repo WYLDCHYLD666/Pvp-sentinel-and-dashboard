@@ -1,0 +1,4 @@
+c4799972032d571985f5576b9b9fc475a85b7f0efbe46da924343294e2f274aa  SentinelUI-v0.3.0-purge-scheduler-alpha9-enforce-compile-fix.zip
+f05c109f8895316afce569898b3ae1ab0672f003d8eda4dc3a3d4cab8b0db3af  package/@SentinelUI/addons/SentinelUI.pbo
+1a42d12fb9f8a367b47d7c8d878e0e7ea0194af3d8272c2fe35b515f38cf510d  package/@SentinelUI/addons/SentinelUI.pbo.SentinelUI_3784083479.bisign
+58e3c5d415c1c6b747aee097ac83f76c60e08ed28958b8e2df23625dd8e52f21  src/SentinelUI/sounds/purge_siren_pcm.wav
