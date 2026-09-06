@@ -1,0 +1,4 @@
+98599d9e10a5374ed6c22e92028ac72e430fa751ff056e04539908656674ba28  SentinelUI-v0.3.0-purge-scheduler-alpha8-complete-zone-cards.zip
+5515bc298c780ab68d3a99601849885e6f94733dc7d56f4b9d2118213c7fe6c4  package/@SentinelUI/addons/SentinelUI.pbo
+dce508f4f2a90c964185929d728e705bb3cf058904340a4d919af44c70e872ce  package/@SentinelUI/addons/SentinelUI.pbo.SentinelUI_3784083479.bisign
+58e3c5d415c1c6b747aee097ac83f76c60e08ed28958b8e2df23625dd8e52f21  src/SentinelUI/sounds/purge_siren_pcm.wav

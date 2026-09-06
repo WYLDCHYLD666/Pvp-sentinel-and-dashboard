@@ -1,0 +1,68 @@
+PanelWidgetClass SentinelUIZoneStatusRoot
+{
+    ignorepointer 1
+    position 0 0
+    size 1 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    {
+        PanelWidgetClass SentinelUIZoneStatusPanel
+        {
+            ignorepointer 1
+            position 0.4175 0.81
+            size 0.165 0.078
+            hexactpos 0
+            vexactpos 0
+            hexactsize 0
+            vexactsize 0
+            color 0.025 0.18 0.10 0.90
+            {
+                ImageWidgetClass SentinelUIZoneStatusIcon
+                {
+                    ignorepointer 1
+                    position 0.035 0.14
+                    size 0.25 0.72
+                    hexactpos 0
+                    vexactpos 0
+                    hexactsize 0
+                    vexactsize 0
+                    fixaspect fixheight
+                    image0 "SentinelUI/gui/icons/safe_ca.paa"
+                    mode blend
+                    "src alpha" 1
+                    stretch 1
+                    filter 1
+                    nocache 0
+                }
+
+                TextWidgetClass SentinelUIZoneStatusLabel
+                {
+                    ignorepointer 1
+                    position 0.31 0.10
+                    size 0.64 0.47
+                    text "SAFE"
+                    font "gui/fonts/sdf_MetronBook24"
+                    text_proportional 1
+                    text_halign left
+                    text_valign center
+                    color 0.34 0.95 0.53 1
+                }
+
+                TextWidgetClass SentinelUIZoneStatusZone
+                {
+                    ignorepointer 1
+                    position 0.31 0.54
+                    size 0.68 0.27
+                    text "SAFE ZONE"
+                    font "gui/fonts/sdf_MetronBook24"
+                    text_proportional 1
+                    text_halign left
+                    text_valign center
+                    color 0.88 0.93 0.90 1
+                }
+            }
+        }
+    }
+}

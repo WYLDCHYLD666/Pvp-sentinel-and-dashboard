@@ -2,6 +2,23 @@
 
 All notable changes to Sentinel are documented in this file.
 
+## SentinelUI v0.3.0-alpha8 - 2026-09-06
+
+### Added
+
+- Separate client-facing SentinelUI source tree
+- Safe and PvP zone status cards
+- Trader, Admin, Event, Radiation and Raid cards using dedicated transparent PAA assets
+- Expansion map zone outlines, labels and hatching
+- Purge countdown and map-wide PvP presentation
+- PCM purge-siren playback diagnostics
+- Signed Workshop-ready release package for Workshop item `3784083479`
+
+### Architecture
+
+- Sentinel server core remains separate and unchanged
+- The SentinelUI adapter carries the active zone type to the client instead of treating every non-PvP zone as Safe
+
 ## v0.8.1 - 2026-07-19
 
 ### Added

@@ -1,0 +1,10 @@
+name = "Sentinel UI";
+picture = "";
+logoSmall = "";
+logo = "";
+logoOver = "";
+tooltip = "Sentinel UI";
+overview = "Player-facing Sentinel zone status dashboard with Expansion map zones.";
+action = "https://sentineladmin.co.uk";
+author = "Sentinel Project";
+version = "0.3.0-purge-scheduler-alpha8-complete-zone-cards";
