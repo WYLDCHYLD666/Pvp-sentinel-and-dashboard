@@ -16,7 +16,7 @@ class CfgMods
         dir = "SentinelUI";
         name = "Sentinel UI";
         author = "Sentinel Project";
-        version = "0.3.0-purge-scheduler-alpha9-enforce-compile-fix";
+        version = "0.3.0-purge-scheduler-alpha26-warning-card";
         type = "mod";
         dependencies[] = {"World", "Mission"};
 
@@ -41,7 +41,7 @@ class CfgSoundShaders
 {
     class SentinelUI_Purge_SoundShader
     {
-        samples[] = {{"SentinelUI\\sounds\\purge_siren_pcm", 1}};
+        samples[] = {{"SentinelUI\sounds\purge_siren", 1}};
         volume = 1;
         range = 50;
         limitation = 0;

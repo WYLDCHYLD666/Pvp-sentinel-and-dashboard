@@ -1,0 +1,76 @@
+PanelWidgetClass SentinelUIPunishmentRoot
+{
+    ignorepointer 1
+    position 0 0
+    size 1 1
+    hexactpos 0
+    vexactpos 0
+    hexactsize 0
+    vexactsize 0
+    {
+        PanelWidgetClass SentinelUIPunishmentPanel
+        {
+            ignorepointer 1
+            position 0.31 0.20
+            size 0.38 0.14
+            hexactpos 0
+            vexactpos 0
+            hexactsize 0
+            vexactsize 0
+            color 0.16 0.09 0.01 0.95
+            {
+                PanelWidgetClass SentinelUIPunishmentAccent
+                {
+                    ignorepointer 1
+                    position 0 0
+                    size 1 0.045
+                    hexactpos 0
+                    vexactpos 0
+                    hexactsize 0
+                    vexactsize 0
+                    color 1 0.62 0.08 1
+                }
+                ImageWidgetClass SentinelUIPunishmentIcon
+                {
+                    ignorepointer 1
+                    position 0.025 0.18
+                    size 0.16 0.64
+                    hexactpos 0
+                    vexactpos 0
+                    hexactsize 0
+                    vexactsize 0
+                    fixaspect fixheight
+                    image0 "SentinelUI/gui/icons/warning_ca.paa"
+                    mode blend
+                    "src alpha" 1
+                    stretch 1
+                    filter 1
+                }
+                TextWidgetClass SentinelUIPunishmentTitle
+                {
+                    ignorepointer 1
+                    position 0.19 0.16
+                    size 0.78 0.30
+                    text "1ST WARNING"
+                    font "gui/fonts/sdf_MetronBook24"
+                    text_proportional 1
+                    text_halign center
+                    text_valign center
+                    color 1 0.72 0.22 1
+                }
+                TextWidgetClass SentinelUIPunishmentMessage
+                {
+                    ignorepointer 1
+                    position 0.19 0.49
+                    size 0.78 0.28
+                    text "SHOOTING OUTSIDE A PVP ZONE"
+                    font "gui/fonts/sdf_MetronBook24"
+                    text_proportional 1
+                    text_halign center
+                    text_valign center
+                    color 1 1 1 1
+                }
+            }
+        }
+    }
+}

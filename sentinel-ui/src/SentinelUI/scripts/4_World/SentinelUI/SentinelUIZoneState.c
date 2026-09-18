@@ -6,6 +6,7 @@ class SentinelUIZoneProtocol
     static const int RPC_MAP_ZONE_DATA = 781946;
     static const int RPC_RULE_REQUEST = 781947;
     static const int RPC_PURGE_STATE = 781948;
+    static const int RPC_PUNISHMENT_WARNING = 781949;
     static const int MAP_PROTOCOL_VERSION = 1;
     static const int RULE_PROTOCOL_VERSION = 1;
     static const int KIND_ENTER_PVP = 1;
@@ -14,6 +15,42 @@ class SentinelUIZoneProtocol
     static const int KIND_PURGE_START = 21;
     static const int KIND_PURGE_END = 22;
     static const int KIND_PURGE_SYNC = 23;
+}
+
+class SentinelUIPunishmentState
+{
+    protected static int s_Sequence;
+    protected static int s_WarningCount;
+    protected static string s_Message;
+
+    static void Apply(int warningCount, string message)
+    {
+        s_WarningCount = warningCount;
+        s_Message = message;
+        s_Sequence++;
+    }
+
+    static int GetSequence()
+    {
+        return s_Sequence;
+    }
+
+    static int GetWarningCount()
+    {
+        return s_WarningCount;
+    }
+
+    static string GetMessage()
+    {
+        return s_Message;
+    }
+
+    static void Reset()
+    {
+        s_Sequence = 0;
+        s_WarningCount = 0;
+        s_Message = "";
+    }
 }
 
 class SentinelUIZoneState
@@ -187,6 +224,51 @@ class SentinelUIPurgeState
 
 modded class PlayerBase
 {
+    protected int m_SentinelUIDamageGateSequence;
+
+    override bool EEOnDamageCalculated(TotalDamageResult damageResult, int damageType, EntityAI source, int component, string dmgZone, string ammo, vector modelPos, float speedCoef)
+    {
+        if (!super.EEOnDamageCalculated(damageResult, damageType, source, component, dmgZone, ammo, modelPos, speedCoef))
+        {
+            return false;
+        }
+
+        if (!GetGame() || !GetGame().IsServer() || !source)
+        {
+            return true;
+        }
+
+        PlayerBase attacker = PlayerBase.Cast(source.GetHierarchyRootPlayer());
+
+        if (!attacker || attacker == this)
+        {
+            return true;
+        }
+
+        if (!SentinelUIPunishmentManager.ShouldBlockDamage(attacker, this, ammo))
+        {
+            return true;
+        }
+
+        // Some loaded mods continue their damage chain after this callback returns
+        // false. Also close DayZ's authoritative damage gate for the lifetime of the
+        // current hit transaction, then release it on the server call queue.
+        m_SentinelUIDamageGateSequence++;
+        SetAllowDamage(false);
+        GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SentinelUIReleaseDamageGate, 250, false, m_SentinelUIDamageGateSequence);
+        return false;
+    }
+
+    protected void SentinelUIReleaseDamageGate(int sequence)
+    {
+        if (!GetGame() || !GetGame().IsServer() || sequence != m_SentinelUIDamageGateSequence)
+        {
+            return;
+        }
+
+        SetAllowDamage(true);
+    }
+
     override void OnRPC(PlayerIdentity sender, int rpc_type, ParamsReadContext ctx)
     {
         super.OnRPC(sender, rpc_type, ctx);
@@ -270,6 +352,26 @@ modded class PlayerBase
 
             SentinelUIPurgeState.Apply(purgePayload.param1, purgePayload.param2, purgePayload.param3);
             Print("[SentinelUI] Purge RPC received kind=" + purgePayload.param1.ToString() + " value=" + purgePayload.param2.ToString() + " event=" + purgePayload.param3);
+            return;
+        }
+
+        if (rpc_type == SentinelUIZoneProtocol.RPC_PUNISHMENT_WARNING)
+        {
+            if (!GetGame() || !GetGame().IsClient())
+            {
+                return;
+            }
+
+            Param2<int, string> warningPayload;
+
+            if (!ctx.Read(warningPayload))
+            {
+                Print("[SentinelUI] unable to read punishment warning RPC");
+                return;
+            }
+
+            SentinelUIPunishmentState.Apply(warningPayload.param1, warningPayload.param2);
+            Print("[SentinelUI] punishment warning received count=" + warningPayload.param1.ToString());
             return;
         }
 

@@ -22,6 +22,7 @@ class SentinelUIMapZoneOverlay
     protected int m_SegmentCursor;
     protected int m_BoundarySegmentCount;
     protected bool m_HatchReadyLogged;
+    protected bool m_HiddenForPurge;
     protected float m_RootX;
     protected float m_RootY;
     protected float m_RootWidth;
@@ -65,6 +66,25 @@ class SentinelUIMapZoneOverlay
         if (!m_Map || !m_Root)
         {
             return;
+        }
+
+        if (SentinelUIPurgeState.IsActive())
+        {
+            if (!m_HiddenForPurge)
+            {
+                m_HiddenForPurge = true;
+                m_Root.Show(false);
+                Print("[SentinelUI] map zones hidden for active Purge");
+            }
+
+            return;
+        }
+
+        if (m_HiddenForPurge)
+        {
+            m_HiddenForPurge = false;
+            m_Root.Show(true);
+            Print("[SentinelUI] map zones restored after Purge");
         }
 
         int sequence = SentinelUIMapZoneStore.GetSequence();

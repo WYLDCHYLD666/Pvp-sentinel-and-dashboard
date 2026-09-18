@@ -1,0 +1,28 @@
+<fieldset class="sentinel-file-bridge-fields">
+  <legend>DayZ server file connection</legend>
+  <p class="muted">Sentinel uses this connection to deliver scheduler changes to your server. Your password is encrypted and is never displayed again.</p>
+
+  <label for="bridge-transport">Connection type</label>
+  <select id="bridge-transport" name="transport" required>
+    <option value="sftp">SFTP</option>
+    <option value="ftps" selected>FTPS</option>
+    <option value="ftp">FTP (hosting compatibility)</option>
+  </select>
+
+  <label for="bridge-host">FTP hostname</label>
+  <input id="bridge-host" name="host" type="text" autocomplete="off" placeholder="ftp.example-host.net" required>
+
+  <label for="bridge-port">Port</label>
+  <input id="bridge-port" name="port" type="number" min="1" max="65535" value="21" required>
+
+  <label for="bridge-username">Username</label>
+  <input id="bridge-username" name="username" type="text" autocomplete="username" required>
+
+  <label for="bridge-password">Password</label>
+  <input id="bridge-password" name="password" type="password" autocomplete="new-password" required>
+
+  <label for="bridge-remote-folder">Remote Sentinel folder</label>
+  <input id="bridge-remote-folder" name="remote_sentinel_folder" type="text" value="/config/Sentinel" required>
+
+  <button type="submit">Test and save connection</button>
+</fieldset>

@@ -79,7 +79,7 @@ class SentinelUIPurgeOverlay
         else if (kind == SentinelUIZoneProtocol.KIND_PURGE_START)
         {
             SetPanelColor(ARGB(247, 74, 2, 5));
-            SetText("PURGE ACTIVE", "!", "MAP-WIDE PVP");
+            SetText("PURGE ACTIVE", "!", "BASE RAIDING ENABLED");
             m_DisplaySeconds = 8.0;
             m_Root.Show(true);
             PlaySiren();
@@ -87,7 +87,7 @@ class SentinelUIPurgeOverlay
         else if (kind == SentinelUIZoneProtocol.KIND_PURGE_END)
         {
             SetPanelColor(ARGB(242, 24, 34, 28));
-            SetText("PURGE ENDED", "", "NORMAL RULES RESTORED");
+            SetText("PURGE ENDED", "", "BASE RAIDING DISABLED");
             m_DisplaySeconds = 5.0;
             m_Root.Show(true);
             StopSiren();
@@ -156,7 +156,7 @@ class SentinelUIPurgeOverlay
             return;
         }
 
-        Print("[SentinelUI] Purge sound configuration found; requesting PCM playback");
+        Print("[SentinelUI] Purge sound configuration found; requesting user Ogg playback");
 
         PlayerBase player = PlayerBase.Cast(GetGame().GetPlayer());
 
@@ -166,13 +166,14 @@ class SentinelUIPurgeOverlay
             return;
         }
 
-        m_SirenEffect = SEffectManager.PlaySoundOnObject("SentinelUI_Purge_SoundSet", player, 0.1, 0.5, false);
+        m_SirenEffect = SEffectManager.CreateSound("SentinelUI_Purge_SoundSet", player.GetPosition());
 
         if (m_SirenEffect)
         {
-            m_SirenEffect.SetSoundAutodestroy(true);
+            m_SirenEffect.SetSoundVolume(1.0);
+            m_SirenEffect.SoundPlay();
             GetGame().GetCallQueue(CALL_CATEGORY_GUI).CallLater(CheckSirenPlayback, 750, false);
-            Print("[SentinelUI] Purge siren requested on local player effect channel");
+            Print("[SentinelUI] Purge siren requested with FoXy-style CreateSound channel");
         }
         else
         {

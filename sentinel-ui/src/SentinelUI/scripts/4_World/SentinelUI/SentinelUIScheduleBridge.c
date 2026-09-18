@@ -20,6 +20,7 @@ class SentinelUIScheduleTransition
 class SentinelUIScheduleConfig
 {
     bool enabled;
+    string updated_at;
     ref array<ref SentinelUIScheduleProfile> profiles;
 }
 
@@ -46,37 +47,15 @@ class SentinelUIScheduleResponse
     ref SentinelUISchedulePayload data;
 }
 
-class SentinelUIScheduleRestCallback : RestCallback
-{
-    override void OnSuccess(string data, int dataSize)
-    {
-        SentinelUIScheduleBridge.GetInstance().OnScheduleResponse(data);
-    }
-
-    override void OnError(int errorCode)
-    {
-        SentinelUIScheduleBridge.GetInstance().OnScheduleRequestFailed("HTTP error " + errorCode.ToString());
-    }
-
-    override void OnTimeout()
-    {
-        SentinelUIScheduleBridge.GetInstance().OnScheduleRequestFailed("request timed out");
-    }
-}
-
 class SentinelUIScheduleBridge
 {
-    static const string API_ROOT = "https://sentineladmin.co.uk/";
-    static const string API_PATH = "dashboard/api/schedule.php";
-    static const int POLL_INTERVAL_MS = 10000;
+    static const string SCHEDULE_FILE = "$profile:SentinelUI/schedule.json";
+    static const int POLL_INTERVAL_MS = 2000;
     static const int COUNTDOWN_TICK_MS = 250;
     static const int PURGE_COUNTDOWN_SECONDS = 10;
 
     protected static ref SentinelUIScheduleBridge s_Instance;
-    protected ref SentinelUIScheduleRestCallback m_Callback;
-    protected RestContext m_Context;
     protected bool m_Initialized;
-    protected bool m_RequestPending;
     protected bool m_HasState;
     protected bool m_Active;
     protected string m_EventName = "Purge";
@@ -86,6 +65,8 @@ class SentinelUIScheduleBridge
     protected int m_LastCountdown = -1;
     protected string m_FiredTransitionAt;
     protected int m_ConsecutiveFailures;
+    protected int m_ActiveUntilEpoch;
+    protected string m_LastPayloadFingerprint;
 
     static SentinelUIScheduleBridge GetInstance()
     {
@@ -104,27 +85,12 @@ class SentinelUIScheduleBridge
             return;
         }
 
-        RestApi api = GetRestApi();
-
-        if (!api)
-        {
-            api = CreateRestApi();
-        }
-
-        if (!api)
-        {
-            Print("[SentinelUI] Purge scheduler bridge could not create REST API");
-            return;
-        }
-
-        m_Context = api.GetRestContext(API_ROOT);
-        m_Callback = new SentinelUIScheduleRestCallback();
         m_Initialized = true;
 
         PollNow();
         GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SentinelUIScheduleBridge.PollTick, POLL_INTERVAL_MS, true);
         GetGame().GetCallQueue(CALL_CATEGORY_SYSTEM).CallLater(SentinelUIScheduleBridge.CountdownTick, COUNTDOWN_TICK_MS, true);
-        Print("[SentinelUI] Purge scheduler bridge started endpoint=" + API_ROOT + API_PATH);
+        Print("[SentinelUI] Purge scheduler file bridge started path=" + SCHEDULE_FILE);
     }
 
     static void PollTick()
@@ -139,49 +105,62 @@ class SentinelUIScheduleBridge
 
     protected void PollNow()
     {
-        if (!m_Initialized || !m_Context || m_RequestPending)
+        if (!m_Initialized)
         {
             return;
         }
 
-        m_RequestPending = true;
-        m_Context.GET(m_Callback, API_PATH);
-    }
-
-    void OnScheduleRequestFailed(string reason)
-    {
-        m_RequestPending = false;
-        m_ConsecutiveFailures++;
-
-        if (m_ConsecutiveFailures == 1 || (m_ConsecutiveFailures % 6) == 0)
+        if (!FileExist(SCHEDULE_FILE))
         {
-            Print("[SentinelUI] Purge scheduler poll failed: " + reason + " failures=" + m_ConsecutiveFailures.ToString());
+            OnScheduleRequestFailed("file not found: " + SCHEDULE_FILE);
+            return;
         }
-    }
-
-    void OnScheduleResponse(string json)
-    {
-        m_RequestPending = false;
 
         SentinelUIScheduleResponse response = new SentinelUIScheduleResponse();
         string parseError;
 
-        if (!JsonFileLoader<SentinelUIScheduleResponse>.LoadData(json, response, parseError))
+        if (!JsonFileLoader<SentinelUIScheduleResponse>.LoadFile(SCHEDULE_FILE, response, parseError))
         {
             OnScheduleRequestFailed(parseError);
             return;
         }
 
+        ApplyScheduleResponse(response);
+    }
+
+    void OnScheduleRequestFailed(string reason)
+    {
+        m_ConsecutiveFailures++;
+
+        if (m_ConsecutiveFailures == 1 || (m_ConsecutiveFailures % 6) == 0)
+        {
+            Print("[SentinelUI] Purge scheduler file read failed: " + reason + " failures=" + m_ConsecutiveFailures.ToString());
+        }
+    }
+
+    protected void ApplyScheduleResponse(SentinelUIScheduleResponse response)
+    {
         if (!response || !response.ok || !response.data || !response.data.state)
         {
-            OnScheduleRequestFailed("API returned no usable state");
+            OnScheduleRequestFailed("file contains no usable state");
             return;
         }
+
+        string fingerprint = BuildPayloadFingerprint(response.data);
+
+        if (fingerprint == m_LastPayloadFingerprint)
+        {
+            m_ConsecutiveFailures = 0;
+            return;
+        }
+
+        m_LastPayloadFingerprint = fingerprint;
 
         m_ConsecutiveFailures = 0;
 
         SentinelUIScheduleStateData state = response.data.state;
         bool isPurge = state.enabled && IsPurgeProfile(state.active_profile);
+        SentinelUIEnforcementState.ApplyRuleProfile(state.active_profile, isPurge);
         string currentEventName = state.active_event;
 
         if (currentEventName == "" && state.active_profile)
@@ -195,6 +174,7 @@ class SentinelUIScheduleBridge
         }
 
         UpdateNextPurgeTransition(response.data);
+        m_ActiveUntilEpoch = ParseIso8601Epoch(state.active_until);
 
         if (!m_HasState)
         {
@@ -209,7 +189,7 @@ class SentinelUIScheduleBridge
             }
 
             Broadcast(SentinelUIZoneProtocol.KIND_PURGE_SYNC, initialActiveValue, m_EventName);
-            Print("[SentinelUI] Purge scheduler initial state active=" + m_Active.ToString() + " event=" + m_EventName);
+            Print("[SentinelUI] Purge scheduler file accepted revision=" + fingerprint + " active=" + m_Active.ToString() + " event=" + m_EventName);
             return;
         }
 
@@ -231,6 +211,34 @@ class SentinelUIScheduleBridge
         {
             m_EventName = currentEventName;
         }
+    }
+
+    protected string BuildPayloadFingerprint(SentinelUISchedulePayload payload)
+    {
+        string updatedAt;
+        string now;
+        string activeSince;
+        string activeUntil;
+        string nextAt;
+
+        if (payload.config)
+        {
+            updatedAt = payload.config.updated_at;
+        }
+
+        if (payload.state)
+        {
+            now = payload.state.now;
+            activeSince = payload.state.active_since;
+            activeUntil = payload.state.active_until;
+
+            if (payload.state.next_transition)
+            {
+                nextAt = payload.state.next_transition.at;
+            }
+        }
+
+        return updatedAt + "|" + now + "|" + activeSince + "|" + activeUntil + "|" + nextAt;
     }
 
     protected bool IsPurgeProfile(SentinelUIScheduleProfile profile)
@@ -299,12 +307,33 @@ class SentinelUIScheduleBridge
 
     protected void UpdateCountdown()
     {
-        if (!m_HasState || m_Active || m_NextPurgeEpoch <= 0)
+        if (!m_HasState)
         {
             return;
         }
 
-        int remaining = m_NextPurgeEpoch - GetUtcEpochNow();
+        int nowEpoch = GetUtcEpochNow();
+
+        if (m_Active)
+        {
+            if (m_ActiveUntilEpoch > 0 && nowEpoch >= m_ActiveUntilEpoch)
+            {
+                m_Active = false;
+                m_ActiveUntilEpoch = 0;
+                SentinelUIEnforcementState.ApplyPurgeState(false);
+                Broadcast(SentinelUIZoneProtocol.KIND_PURGE_END, 0, m_EventName);
+                Print("[SentinelUI] Purge ended at scheduled transition event=" + m_EventName);
+            }
+
+            return;
+        }
+
+        if (m_NextPurgeEpoch <= 0)
+        {
+            return;
+        }
+
+        int remaining = m_NextPurgeEpoch - nowEpoch;
 
         if (remaining > PURGE_COUNTDOWN_SECONDS)
         {
@@ -330,6 +359,7 @@ class SentinelUIScheduleBridge
             m_Active = true;
             m_EventName = m_NextPurgeName;
             m_LastCountdown = -1;
+            SentinelUIEnforcementState.ApplyPurgeState(true);
             Broadcast(SentinelUIZoneProtocol.KIND_PURGE_START, 0, m_EventName);
             Print("[SentinelUI] Purge started at scheduled transition event=" + m_EventName);
         }

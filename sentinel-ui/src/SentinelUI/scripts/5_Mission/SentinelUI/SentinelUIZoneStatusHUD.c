@@ -282,8 +282,10 @@ modded class MissionGameplay
 {
     protected ref SentinelUIZoneStatusHUD m_SentinelUIZoneStatusHUD;
     protected ref SentinelUIPurgeOverlay m_SentinelUIPurgeOverlay;
+    protected ref SentinelUIPunishmentOverlay m_SentinelUIPunishmentOverlay;
     protected int m_SentinelUIZoneSequence = -1;
     protected int m_SentinelUIPurgeSequence = -1;
+    protected int m_SentinelUIPunishmentSequence = -1;
 
     override void OnUpdate(float timeslice)
     {
@@ -321,6 +323,12 @@ modded class MissionGameplay
                 m_SentinelUIPurgeOverlay = null;
             }
 
+            m_SentinelUIPunishmentOverlay = new SentinelUIPunishmentOverlay();
+            if (!m_SentinelUIPunishmentOverlay.Init())
+            {
+                m_SentinelUIPunishmentOverlay = null;
+            }
+
             SentinelUIMapZoneStore.RequestFromServer();
             SentinelUIPurgeState.RequestFromServer();
             Print("[SentinelUI] zone status HUD ready");
@@ -351,6 +359,21 @@ modded class MissionGameplay
         {
             m_SentinelUIPurgeOverlay.Update(timeslice);
         }
+
+        int punishmentSequence = SentinelUIPunishmentState.GetSequence();
+        if (punishmentSequence != m_SentinelUIPunishmentSequence)
+        {
+            m_SentinelUIPunishmentSequence = punishmentSequence;
+            if (m_SentinelUIPunishmentOverlay && SentinelUIPunishmentState.GetWarningCount() > 0)
+            {
+                m_SentinelUIPunishmentOverlay.ShowWarning(SentinelUIPunishmentState.GetWarningCount(), SentinelUIPunishmentState.GetMessage());
+            }
+        }
+
+        if (m_SentinelUIPunishmentOverlay)
+        {
+            m_SentinelUIPunishmentOverlay.Update(timeslice);
+        }
     }
 
     override void OnMissionFinish()
@@ -367,10 +390,18 @@ modded class MissionGameplay
             m_SentinelUIPurgeOverlay = null;
         }
 
+        if (m_SentinelUIPunishmentOverlay)
+        {
+            m_SentinelUIPunishmentOverlay.Destroy();
+            m_SentinelUIPunishmentOverlay = null;
+        }
+
         m_SentinelUIZoneSequence = -1;
         m_SentinelUIPurgeSequence = -1;
+        m_SentinelUIPunishmentSequence = -1;
         SentinelUIMapZoneStore.Reset();
         SentinelUIPurgeState.Reset();
+        SentinelUIPunishmentState.Reset();
         super.OnMissionFinish();
     }
 }
